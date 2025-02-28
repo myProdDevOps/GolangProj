@@ -1,0 +1,4 @@
+configs/
+go.mod
+.idea/
+.DS_Store
