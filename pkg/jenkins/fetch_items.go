@@ -55,10 +55,14 @@ func (c *Client) FetchAllJobs() (*JobsResponse, error) {
 	return &jobsResponse, nil
 }
 
-// CheckExistJobs method
-func (c *Client) CheckExistJobs(jobName string) ([]string, error) {
+/* CheckExistJobs method
+ * Input: a single job string or a file path of jobs
+ */
+func (c *Client) CheckExistJobs(input string) ([]ExistJob, error) {
 	var jobArr []string
-	if file, err := os.Open(jobName); err == nil {
+
+	if file, err := os.Open(input); err == nil {
+		// CASE: Input is a file
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
 		for scanner.Scan() {
@@ -67,6 +71,36 @@ func (c *Client) CheckExistJobs(jobName string) ([]string, error) {
 				jobArr = append(jobArr, line)
 			}
 		}
+		if err := scanner.Err(); err != nil {
+			return nil, err
+		}
+	} else {
+		// CASE: Input is a single job
+		jobArr = append(jobArr, input)
 	}
-	return jobArr, nil
+
+	var results []ExistJob
+	for _, jobName := range jobArr {
+		endpoint := fmt.Sprintf("/job/%s/api/json", jobName)
+		req, err := c.newRequest("GET", endpoint)
+		if err != nil {
+			results = append(results, ExistJob{Name: jobName, Exist: false})
+			continue
+		}
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			results = append(results, ExistJob{Name: jobName, Exist: false})
+			continue
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode == http.StatusOK {
+			results = append(results, ExistJob{Name: jobName, Exist: true})
+		} else {
+			results = append(results, ExistJob{Name: jobName, Exist: false})
+		}
+	}
+
+	return results, nil
 }

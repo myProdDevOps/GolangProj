@@ -2,3 +2,4 @@ configs/
 go.mod
 .idea/
 .DS_Store
+cmd/deploy_jenkins/site.txt

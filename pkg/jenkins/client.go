@@ -31,7 +31,10 @@ func LoadConfig(configPath string) (*Client, error) {
 	return &client, nil
 }
 
-// newRequest method
+/* newRequest method -- INPUT list
+ * 1. FetchAllJob: method: GET -- endpoint: /api/json
+ * 2. CheckJobExist: method: GET -- endpoint: /job/{job_name}/api/json
+ */
 func (c *Client) newRequest(method, endpoint string) (*http.Request, error) {
 	var url string = c.BaseURL + endpoint
 	req, err := http.NewRequest(method, url, nil) // Empty body
