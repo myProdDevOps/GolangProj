@@ -1,0 +1,3 @@
+[submodule "deploy/terraform"]
+	path = deploy/terraform
+	url = https://github.com/myProdDevOps/TerraformProj.git
